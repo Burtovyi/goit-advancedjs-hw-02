@@ -3,7 +3,7 @@ const refs = {
   btnStop: document.querySelector('button[data-stop]'),
 };
 let timerBgColor = null;
-
+refs.btnStop.disabled = true;
 function getRandomHexColor() {
   return `#${Math.floor(Math.random() * 16777215)
     .toString(16)
