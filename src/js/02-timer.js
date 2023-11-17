@@ -14,7 +14,7 @@ const refs = {
 
 refs.btnStart.disabled = true;
 let timer = null;
-let inputDateValue;
+let time;
 
 const options = {
   enableTime: true,
@@ -23,50 +23,46 @@ const options = {
   minuteIncrement: 1,
   onClose(selectedDates) {
     checkDate(selectedDates[0].getTime());
-    clearInterval(timer);
-    fillResultDisplay();
   },
 };
+
 flatpickr(refs.inputDate, options);
 
 function checkDate(date) {
-  let startDate = new Date().getTime();
-  if (startDate > date) {
+  if (new Date().getTime() > date) {
     iziToast.error({
       title: 'Error',
       message: 'Please choose a date in the future',
     });
-    if (!refs.btnStart.disabled) {
-      refs.btnStart.disabled = true;
-    }
   } else {
-    fillResultDisplay(convertMs(date - new Date().getTime()));
-    inputDateValue = date;
-    refs.btnStart.disabled = false;
     iziToast.success({
       title: 'OK',
       message: 'Let`s go!',
     });
-    refs.btnStart.addEventListener('click', () => {
-      timer = setInterval(() => {
-        if (date >= new Date().getTime()) {
-          const countdownTime = convertMs(date - new Date().getTime());
-          if (!refs.btnStart.disabled) {
-            refs.btnStart.disabled = true;
-          }
-          fillResultDisplay(countdownTime);
-          return;
-        } else {
-          clearInterval(timer);
-          return iziToast.warning({
-            title: 'Time is up',
-            message: 'Shall we do it again?',
-          });
-        }
-      }, 1000);
-    });
+    time = date;
+    refs.btnStart.disabled = false;
   }
 }
+
+refs.btnStart.addEventListener('click', () => {
+  refs.inputDate.disabled = true;
+  refs.btnStart.disabled = true;
+
+  timer = setInterval(() => {
+    let checkTime = time - new Date().getTime();
+    if (checkTime >= 0) {
+      let countdownTime = convertMs(checkTime);
+      fillResultDisplay(countdownTime);
+    } else {
+      clearInterval(timer);
+      refs.inputDate.disabled = false;
+      return iziToast.warning({
+        title: 'Time is up',
+        message: 'Shall we do it again?',
+      });
+    }
+  }, 1000);
+});
 
 function fillResultDisplay({ days, hours, minutes, seconds }) {
   if (days.length >= 3) {
